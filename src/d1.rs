@@ -1,3 +1,9 @@
+pub fn parse(input: &str) -> impl Iterator<Item = usize> + '_ {
+    input
+        .lines()
+        .map(|line| line.parse::<usize>().expect("Couldn't parse line"))
+}
+
 pub fn basic_fuel(masses: &[usize]) -> usize {
     masses.iter().map(&fuel_for_mass).sum()
 }
@@ -25,13 +31,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn calculates_basic_fuel() {
+    fn test_basic_fuel() {
         let masses = [12, 14, 1969, 100756];
         assert_eq!(basic_fuel(&masses), 34241);
     }
 
     #[test]
-    fn calculates_total_fuel() {
+    fn test_total_fuel() {
         assert_eq!(total_fuel(&[14]), 2);
         assert_eq!(total_fuel(&[1969]), 966);
         assert_eq!(total_fuel(&[100756]), 50346);
