@@ -8,11 +8,9 @@ fn main() -> std::io::Result<()> {
     file.read_to_string(&mut contents)?;
     let masses: Vec<usize> = contents
         .lines()
-        .map(|line| match line.parse::<usize>() {
-            Ok(n) => n,
-            Err(_e) => 0,
-        })
+        .map(|line| line.parse::<usize>().expect("Couldn't parse line"))
         .collect();
-    println!("Day 1:1: {:?}", d1::basic_fuel(&masses));
+    println!("Day 1:1: {}", d1::basic_fuel(&masses));
+    println!("Day 1:2: {}", d1::total_fuel(&masses));
     Ok(())
 }
