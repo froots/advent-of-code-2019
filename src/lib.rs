@@ -1,5 +1,5 @@
-pub fn required_fuel(mass: i32) -> i32 {
-    ((mass / 3) as i32) - 2
+pub fn required_fuel(mass: &usize) -> usize {
+    ((mass / 3) as usize) - 2
 }
 
 #[cfg(test)]
@@ -8,9 +8,10 @@ mod tests {
 
     #[test]
     fn calculates_required_fuel() {
-        assert_eq!(required_fuel(12), 2);
-        assert_eq!(required_fuel(14), 2);
-        assert_eq!(required_fuel(1969), 654);
-        assert_eq!(required_fuel(100756), 33583);
+        let data = [(12, 2), (14, 2), (1969, 654), (100756, 33583)];
+
+        for (mass, expected_fuel) in data.iter() {
+            assert_eq!(required_fuel(mass), *expected_fuel);
+        }
     }
 }
