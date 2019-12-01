@@ -1,10 +1,12 @@
-pub fn total_fuel(masses: &[usize]) -> usize {
-    masses.iter().map(|mass| mass / 3 - 2).sum()
+pub mod d1 {
+    pub fn total_fuel(masses: &[usize]) -> usize {
+        masses.iter().map(|mass| mass / 3 - 2).sum()
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::d1::total_fuel;
 
     #[test]
     fn calculates_total_fuel() {
