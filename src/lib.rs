@@ -4,7 +4,7 @@ pub fn required_fuel(mass: &usize) -> usize {
 }
 
 pub fn total_fuel(masses: &[usize]) -> usize {
-    masses.iter().map(|mass| required_fuel(&mass)).sum()
+    masses.iter().map(&required_fuel).sum()
 }
 
 #[cfg(test)]
