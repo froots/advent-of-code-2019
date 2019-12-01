@@ -13,6 +13,6 @@ fn main() -> std::io::Result<()> {
             Err(_e) => 0,
         })
         .collect();
-    println!("Day 1:1: {:?}", d1::total_fuel(&masses));
+    println!("Day 1:1: {:?}", d1::basic_fuel(&masses));
     Ok(())
 }
