@@ -1,5 +1,6 @@
 pub fn required_fuel(mass: &usize) -> usize {
-    ((mass / 3) as usize) - 2
+    // Implicitly relying on Rust's integer division to round down
+    mass / 3 - 2
 }
 
 pub fn total_fuel(masses: &[usize]) -> usize {
