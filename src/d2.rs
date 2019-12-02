@@ -1,5 +1,22 @@
-pub fn part1(inp: &mut Vec<i64>) -> i64 {
-    inp[0]
+pub fn part1(inp: Vec<usize>) -> Vec<usize> {
+    let mut computed = inp.clone();
+    let mut pointer = 0;
+
+    while computed[pointer] != 99 {
+        let i1 = computed[pointer + 1];
+        let i2 = computed[pointer + 2];
+        let res_i = computed[pointer + 3];
+
+        match computed[pointer] {
+            1 => computed[res_i] = computed[i1] + computed[i2],
+            2 => computed[res_i] = computed[i1] * computed[i2],
+            _ => panic!("Invalid opcode: {}", computed[pointer]),
+        }
+
+        pointer += 4;
+    }
+
+    computed
 }
 
 #[cfg(test)]
@@ -8,7 +25,12 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        let mut inp1 = vec![1, 0, 0, 0, 99];
-        assert_eq!(part1(&mut inp1), 1);
+        assert_eq!(part1(vec![1, 0, 0, 0, 99]), vec![2, 0, 0, 0, 99]);
+        assert_eq!(part1(vec![2, 3, 0, 3, 99]), vec![2, 3, 0, 6, 99]);
+        assert_eq!(part1(vec![2, 4, 4, 5, 99, 0]), vec![2, 4, 4, 5, 99, 9801]);
+        assert_eq!(
+            part1(vec![1, 1, 1, 4, 99, 5, 6, 0, 99]),
+            vec![30, 1, 1, 4, 2, 5, 6, 0, 99]
+        );
     }
 }
