@@ -1,5 +1,4 @@
-use advent_of_code_2019::d1;
-use advent_of_code_2019::input;
+use advent_of_code_2019::{d1, input};
 
 fn main() -> std::io::Result<()> {
     let inp = input::read("./inputs/day1.txt").expect("Couldn't read file");
