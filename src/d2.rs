@@ -1,3 +1,5 @@
+use std::cmp;
+
 pub fn part1(inp: &Vec<usize>) -> Vec<usize> {
     let mut computed = inp.clone();
     let mut pointer = 0;
@@ -22,8 +24,8 @@ pub fn part1(inp: &Vec<usize>) -> Vec<usize> {
 pub fn part2(inp: &Vec<usize>, target: usize) -> (usize, usize) {
     let mut noun = 0;
     let mut verb = 0;
-    'outer: for n in 0..100 {
-        'inner: for v in 0..100 {
+    'outer: for n in 0..(cmp::min(100, inp.len())) {
+        'inner: for v in 0..(cmp::min(100, inp.len())) {
             let mut i = inp.clone();
             i[1] = n;
             i[2] = v;
@@ -50,5 +52,11 @@ mod tests {
             part1(&vec![1, 1, 1, 4, 99, 5, 6, 0, 99]),
             vec![30, 1, 1, 4, 2, 5, 6, 0, 99]
         );
+    }
+
+    #[test]
+    fn test_part2() {
+        let inp = vec![1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
+        assert_eq!(part2(&inp, 2500), (2, 10));
     }
 }
