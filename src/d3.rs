@@ -5,11 +5,9 @@ type Wire = HashMap<(isize, isize), isize>;
 
 pub fn part1(input: &str) -> isize {
     let (wire1, wire2) = parse_wires(input);
-    let wire_set1: HashSet<(isize, isize)> = wire1.keys().cloned().collect();
-    let wire_set2: HashSet<(isize, isize)> = wire2.keys().cloned().collect();
-    let mut distances: Vec<isize> = wire_set1
-        .intersection(&wire_set2)
-        .cloned()
+    let intersections = get_intersections(&wire1, &wire2);
+    let mut distances: Vec<isize> = intersections
+        .into_iter()
         .map(|(x, y)| x.abs() + y.abs())
         .collect();
     distances.sort();
@@ -19,6 +17,12 @@ pub fn part1(input: &str) -> isize {
 pub fn part2(input: &str) -> isize {
     let (wire1, wire2) = parse_wires(input);
     1
+}
+
+fn get_intersections(wire1: &Wire, wire2: &Wire) -> Vec<(isize, isize)> {
+    let wire_set1: HashSet<(isize, isize)> = wire1.keys().cloned().collect();
+    let wire_set2: HashSet<(isize, isize)> = wire2.keys().cloned().collect();
+    wire_set1.intersection(&wire_set2).cloned().collect()
 }
 
 fn parse_wires(input: &str) -> (Wire, Wire) {
