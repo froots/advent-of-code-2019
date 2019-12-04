@@ -16,7 +16,13 @@ pub fn part1(input: &str) -> isize {
 
 pub fn part2(input: &str) -> isize {
     let (wire1, wire2) = parse_wires(input);
-    1
+    let intersections = get_intersections(&wire1, &wire2);
+    let mut distances: Vec<isize> = intersections
+        .into_iter()
+        .map(|k| wire1.get(&k).unwrap() + wire2.get(&k).unwrap())
+        .collect();
+    distances.sort();
+    *distances.first().unwrap()
 }
 
 fn get_intersections(wire1: &Wire, wire2: &Wire) -> Vec<(isize, isize)> {
@@ -74,12 +80,12 @@ mod tests {
         assert_eq!(part1(&inp2), 135);
     }
 
-    // #[test]
-    // fn test_part2() {
-    //     let inp1 = "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83";
-    //     let inp2 =
-    //         "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7";
-    //     assert_eq!(part2(&inp1), 610);
-    //     assert_eq!(part2(&inp2), 410);
-    // }
+    #[test]
+    fn test_part2() {
+        let inp1 = "R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83";
+        let inp2 =
+            "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7";
+        assert_eq!(part2(&inp1), 610);
+        assert_eq!(part2(&inp2), 410);
+    }
 }
