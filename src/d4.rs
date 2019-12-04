@@ -1,15 +1,29 @@
 pub fn part1(lower: usize, upper: usize) -> usize {
     let mut matching = 0;
     for n in lower..=upper {
-        if all_criteria(&n) {
+        if part1_criteria(&n) {
             matching += 1;
         }
     }
     matching
 }
 
-fn all_criteria(n: &usize) -> bool {
+pub fn part2(lower: usize, upper: usize) -> usize {
+    let mut matching = 0;
+    for n in lower..=upper {
+        if part2_criteria(&n) {
+            matching += 1;
+        }
+    }
+    matching
+}
+
+fn part1_criteria(n: &usize) -> bool {
     has_digit_size(n, 6) && has_adjacent_duplicate(n) && never_decreases(n)
+}
+
+fn part2_criteria(n: &usize) -> bool {
+    has_digit_size(n, 6) && has_pair(n) && never_decreases(n)
 }
 
 fn has_digit_size(n: &usize, size: usize) -> bool {
@@ -29,6 +43,29 @@ fn has_adjacent_duplicate(n: &usize) -> bool {
     }
 
     dupe
+}
+
+fn has_pair(n: &usize) -> bool {
+    let digits = n.to_string();
+    let mut memo = ('_', 1);
+    let mut pair = false;
+
+    for d in digits.chars() {
+        if d == memo.0 {
+            memo = (d, memo.1 + 1);
+        } else {
+            if memo.1 == 2 {
+                pair = true;
+            }
+            memo = (d, 1);
+        }
+    }
+
+    if memo.1 == 2 {
+        pair = true;
+    }
+
+    pair
 }
 
 fn never_decreases(n: &usize) -> bool {
@@ -71,10 +108,17 @@ mod tests {
     }
 
     #[test]
-    fn test_all_criteria() {
-        assert!(all_criteria(&111111));
-        assert!(!all_criteria(&223450));
-        assert!(!all_criteria(&123789));
+    fn test_part1_criteria() {
+        assert!(part1_criteria(&111111));
+        assert!(!part1_criteria(&223450));
+        assert!(!part1_criteria(&123789));
+    }
+
+    #[test]
+    fn test_part2_criteria() {
+        assert!(part2_criteria(&112233));
+        assert!(!part2_criteria(&123444));
+        assert!(part2_criteria(&111122));
     }
 
     #[test]
