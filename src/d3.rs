@@ -1,16 +1,19 @@
 use std::collections::HashSet;
 
-pub fn part1(input: &str) -> usize {
+pub fn part1(input: &str) -> isize {
     let wires: Vec<HashSet<(isize, isize)>> = input
         .lines()
         .map(|wire_input| parse_wire_input(&wire_input))
         .collect();
     let wire1 = wires.get(0).unwrap();
     let wire2 = wires.get(1).unwrap();
-    let crosses: Vec<(isize, isize)> = wire1.intersection(&wire2).cloned().collect();
-    let mut distances: Vec<isize> = crosses.iter().map(|(x, y)| x.abs() + y.abs()).collect();
+    let mut distances: Vec<isize> = wire1
+        .intersection(&wire2)
+        .cloned()
+        .map(|(x, y)| x.abs() + y.abs())
+        .collect();
     distances.sort();
-    *distances.get(0).unwrap() as usize
+    *distances.first().unwrap()
 }
 
 fn parse_wire_input(input: &str) -> HashSet<(isize, isize)> {
