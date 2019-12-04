@@ -5,7 +5,12 @@ pub fn part1(input: &str) -> usize {
         .lines()
         .map(|wire_input| parse_wire_input(&wire_input))
         .collect();
-    wires.len()
+    let wire1 = wires.get(0).unwrap();
+    let wire2 = wires.get(1).unwrap();
+    let crosses: Vec<(isize, isize)> = wire1.intersection(&wire2).cloned().collect();
+    let mut distances: Vec<isize> = crosses.iter().map(|(x, y)| x.abs() + y.abs()).collect();
+    distances.sort();
+    *distances.get(0).unwrap() as usize
 }
 
 fn parse_wire_input(input: &str) -> HashSet<(isize, isize)> {
