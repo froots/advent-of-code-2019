@@ -1,3 +1,5 @@
+use std::cmp;
+
 struct Intcode {
     state: Vec<i32>,
     pointer: usize,
@@ -53,31 +55,27 @@ impl Iterator for Intcode {
 
 pub fn part1(inp: &Vec<i32>) -> Vec<i32> {
     let computer = Intcode::new(inp.clone());
-    let mut s: Vec<i32> = Vec::new();
-    for state in computer {
-        println!("{:?}", state);
-        s = state;
-    }
-    s
+    let states: Vec<Vec<i32>> = computer.collect();
+    states.last().unwrap().clone()
 }
 
-// pub fn part2(inp: &Vec<usize>, target: usize) -> (usize, usize) {
-//     let mut noun = 0;
-//     let mut verb = 0;
-//     'outer: for n in 0..(cmp::min(100, inp.len())) {
-//         'inner: for v in 0..(cmp::min(100, inp.len())) {
-//             let mut i = inp.clone();
-//             i[1] = n;
-//             i[2] = v;
-//             if part1(&i)[0] == target {
-//                 noun = n;
-//                 verb = v;
-//                 break 'outer;
-//             }
-//         }
-//     }
-//     (noun, verb)
-// }
+pub fn part2(inp: &Vec<i32>, target: i32) -> (i32, i32) {
+    let mut noun = 0;
+    let mut verb = 0;
+    'outer: for n in 0..(cmp::min(100, inp.len())) {
+        'inner: for v in 0..(cmp::min(100, inp.len())) {
+            let mut i = inp.clone();
+            i[1] = n as i32;
+            i[2] = v as i32;
+            if part1(&i)[0] == target {
+                noun = n as i32;
+                verb = v as i32;
+                break 'outer;
+            }
+        }
+    }
+    (noun, verb)
+}
 
 #[cfg(test)]
 mod tests {
@@ -108,9 +106,9 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn test_part2() {
-    //     let inp = vec![1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
-    //     assert_eq!(part2(&inp, 2500), (2, 10));
-    // }
+    #[test]
+    fn test_part2() {
+        let inp: Vec<i32> = vec![1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
+        assert_eq!(part2(&inp, 2500), (2, 10));
+    }
 }

@@ -1,7 +1,7 @@
 use advent_of_code_2019::d2;
 
 fn main() -> std::io::Result<()> {
-    let mut inp = vec![
+    let mut inp: Vec<i32> = vec![
         1, 0, 0, 3, 1, 1, 2, 3, 1, 3, 4, 3, 1, 5, 0, 3, 2, 13, 1, 19, 1, 19, 9, 23, 1, 5, 23, 27,
         1, 27, 9, 31, 1, 6, 31, 35, 2, 35, 9, 39, 1, 39, 6, 43, 2, 9, 43, 47, 1, 47, 6, 51, 2, 51,
         9, 55, 1, 5, 55, 59, 2, 59, 6, 63, 1, 9, 63, 67, 1, 67, 10, 71, 1, 71, 13, 75, 2, 13, 75,
@@ -13,7 +13,7 @@ fn main() -> std::io::Result<()> {
     inp[2] = 2;
     println!("Day 2:1: {}", d2::part1(&inp)[0]);
 
-    // let (noun, verb) = d2::part2(&inp, 19690720);
-    // println!("Day 2:2: {}", 100 * noun + verb);
+    let (noun, verb) = d2::part2(&inp, 19690720);
+    println!("Day 2:2: {}", 100 * noun + verb);
     Ok(())
 }
