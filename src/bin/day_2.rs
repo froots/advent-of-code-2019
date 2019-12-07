@@ -14,7 +14,7 @@ fn main() -> std::io::Result<()> {
     inp1[2] = 2;
     println!("Day 2:1: {}", d2::part1(&inp1)[0]);
 
-    let (noun, verb) = d2::part2(&inp, 19690720);
-    println!("Day 2:2: {}", 100 * noun + verb);
+    // let (noun, verb) = d2::part2(&inp, 19690720);
+    // println!("Day 2:2: {}", 100 * noun + verb);
     Ok(())
 }
