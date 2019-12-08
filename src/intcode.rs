@@ -1,6 +1,7 @@
 pub struct Intcode {
     state: Vec<i32>,
     input: Option<i32>,
+    pub output: Option<i32>,
     pointer: usize,
 }
 
@@ -9,6 +10,7 @@ impl Intcode {
         Intcode {
             state,
             input: None,
+            output: None,
             pointer: 0,
         }
     }
@@ -17,6 +19,7 @@ impl Intcode {
         Intcode {
             state,
             input: Some(input),
+            output: None,
             pointer: 0,
         }
     }
@@ -25,8 +28,8 @@ impl Intcode {
         self.last()
     }
 
-    pub fn output(&mut self) -> Option<i32> {
-        Some(1)
+    pub fn execute_with_output(&mut self) -> (Option<Vec<i32>>, Option<i32>) {
+        (self.execute(), self.output)
     }
 
     fn pointer_value(&self) -> &i32 {
@@ -64,6 +67,16 @@ impl Intcode {
         self.pointer += 2;
         self.state.clone()
     }
+
+    fn output(&mut self) -> Vec<i32> {
+        if self.output != None {
+            panic!("Program already created output");
+        }
+        let i = self.get_param(1);
+        self.output = self.state.get(i).cloned();
+        self.pointer += 2;
+        self.state.clone()
+    }
 }
 
 impl Iterator for Intcode {
@@ -74,6 +87,7 @@ impl Iterator for Intcode {
             1 => Some(self.add()),
             2 => Some(self.mult()),
             3 => Some(self.input()),
+            4 => Some(self.output()),
             99 => None,
             _ => None,
         }
@@ -105,8 +119,24 @@ mod tests {
     }
 
     #[test]
+    fn test_intcode4() {
+        let mut computer = Intcode::new(vec![4, 2, 99]);
+        assert_eq!(computer.output, None);
+        assert_eq!(computer.next(), Some(vec![4, 2, 99]));
+        assert_eq!(computer.next(), None);
+        assert_eq!(computer.output, Some(99));
+    }
+
+    #[test]
     fn test_execute() {
         let mut computer = Intcode::new(vec![2, 3, 0, 3, 99]);
         assert_eq!(computer.execute(), Some(vec![2, 3, 0, 6, 99]));
+    }
+
+    #[test]
+    fn test_execute_with_output() {
+        let mut computer = Intcode::new_with_input(vec![3, 0, 4, 0, 99], 12);
+        let (_, output) = computer.execute_with_output();
+        assert_eq!(output, Some(12));
     }
 }
