@@ -54,6 +54,16 @@ impl Intcode {
         self.pointer += 4;
         self.state.clone()
     }
+
+    fn input(&mut self) -> Vec<i32> {
+        if self.input == None {
+            panic!("Input opcode requires a defined input prop");
+        }
+        let i = self.get_param(1);
+        self.state[i] = self.input.unwrap();
+        self.pointer += 2;
+        self.state.clone()
+    }
 }
 
 impl Iterator for Intcode {
@@ -63,6 +73,7 @@ impl Iterator for Intcode {
         match self.pointer_value() {
             1 => Some(self.add()),
             2 => Some(self.mult()),
+            3 => Some(self.input()),
             99 => None,
             _ => None,
         }
@@ -90,7 +101,7 @@ mod tests {
     #[test]
     fn test_intcode3() {
         let mut computer = Intcode::new_with_input(vec![3, 0, 4, 0, 99], 1);
-        assert_eq!(computer.output(), Some(1));
+        assert_eq!(computer.next(), Some(vec![1, 0, 4, 0, 99]));
     }
 
     #[test]

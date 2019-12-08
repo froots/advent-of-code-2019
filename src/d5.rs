@@ -2,8 +2,8 @@ use crate::intcode;
 
 pub fn part1(program_text: &str, input: i32) -> i32 {
     let program = parse(program_text);
-    let computer = intcode::Intcode::new_with_input(program, 1);
-    1
+    let mut computer = intcode::Intcode::new_with_input(program, 1);
+    computer.output().unwrap()
 }
 
 fn parse(program_text: &str) -> Vec<i32> {
