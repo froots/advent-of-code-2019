@@ -3,7 +3,7 @@ use std::cmp;
 
 pub fn part1(inp: &Vec<i32>) -> Vec<i32> {
     let mut computer = intcode::Intcode::new(inp.clone());
-    computer.execute()
+    computer.execute().unwrap()
 }
 
 pub fn part2(inp: &Vec<i32>, target: i32) -> (i32, i32) {

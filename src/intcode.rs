@@ -11,9 +11,8 @@ impl Intcode {
         }
     }
 
-    pub fn execute(&mut self) -> Vec<i32> {
-        let states: Vec<Vec<i32>> = self.collect();
-        states.last().unwrap().clone()
+    pub fn execute(&mut self) -> Option<Vec<i32>> {
+        self.last()
     }
 
     fn pointer_value(&self) -> &i32 {
@@ -72,5 +71,11 @@ mod tests {
         let mut computer = Intcode::new(vec![2, 3, 0, 3, 99]);
         assert_eq!(computer.next(), Some(vec![2, 3, 0, 6, 99]));
         assert_eq!(computer.next(), None);
+    }
+
+    #[test]
+    fn test_execute() {
+        let mut computer = Intcode::new(vec![2, 3, 0, 3, 99]);
+        assert_eq!(computer.execute(), Some(vec![2, 3, 0, 6, 99]));
     }
 }
