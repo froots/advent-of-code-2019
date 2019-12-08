@@ -1,18 +1,32 @@
 pub struct Intcode {
     state: Vec<i32>,
+    input: Option<i32>,
     pointer: usize,
 }
 
 impl Intcode {
     pub fn new(state: Vec<i32>) -> Intcode {
         Intcode {
-            state: state,
+            state,
+            input: None,
+            pointer: 0,
+        }
+    }
+
+    pub fn new_with_input(state: Vec<i32>, input: i32) -> Intcode {
+        Intcode {
+            state,
+            input: Some(input),
             pointer: 0,
         }
     }
 
     pub fn execute(&mut self) -> Option<Vec<i32>> {
         self.last()
+    }
+
+    pub fn output(&mut self) -> Option<i32> {
+        Some(1)
     }
 
     fn pointer_value(&self) -> &i32 {
@@ -71,6 +85,12 @@ mod tests {
         let mut computer = Intcode::new(vec![2, 3, 0, 3, 99]);
         assert_eq!(computer.next(), Some(vec![2, 3, 0, 6, 99]));
         assert_eq!(computer.next(), None);
+    }
+
+    #[test]
+    fn test_intcode3() {
+        let mut computer = Intcode::new_with_input(vec![3, 0, 4, 0, 99], 1);
+        assert_eq!(computer.output(), Some(1));
     }
 
     #[test]
