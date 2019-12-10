@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 #[derive(PartialEq, Debug)]
 enum Operation {
     Add,
@@ -7,6 +9,7 @@ enum Operation {
     Halt,
     JumpIfTrue,
     JumpIfFalse,
+    LessThan,
 }
 
 #[derive(PartialEq, Debug)]
@@ -32,6 +35,7 @@ impl Instruction {
                 4 => Operation::Output,
                 5 => Operation::JumpIfTrue,
                 6 => Operation::JumpIfFalse,
+                7 => Operation::LessThan,
                 99 => Operation::Halt,
                 _ => panic!("Unknown operation code"),
             },
@@ -134,6 +138,17 @@ impl Intcode {
                 0 => self.pointer = p2.expect("Need jump destination").clone() as usize,
                 _ => self.move_pointer(3),
             },
+            Operation::LessThan => {
+                let set_i = self.pointer_value(3).expect("Multiply store index").clone() as usize;
+                self.state[set_i] = match p1
+                    .expect("Need less than param")
+                    .cmp(p2.expect("Need more than param"))
+                {
+                    Ordering::Less => 1,
+                    _ => 0,
+                };
+                self.move_pointer(4);
+            }
             _ => {}
         }
 
@@ -221,6 +236,12 @@ mod tests {
         assert_eq!(computer.pointer, 0);
         assert_eq!(computer.next(), Some(vec![6, 8, 3, 7, 2, 3, 2, 99, 1]));
         assert_eq!(computer.pointer, 3);
+    }
+
+    #[test]
+    fn test_intcode7() {
+        let mut computer = Intcode::new(vec![7, 7, 8, 7, 4, 7, 99, 3, 8]);
+        assert_eq!(computer.next(), Some(vec![7, 7, 8, 7, 4, 7, 99, 1, 8]));
     }
 
     #[test]
