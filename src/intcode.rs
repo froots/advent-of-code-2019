@@ -6,6 +6,7 @@ enum Operation {
     Output,
     Halt,
     JumpIfTrue,
+    JumpIfFalse,
 }
 
 #[derive(PartialEq, Debug)]
@@ -30,6 +31,7 @@ impl Instruction {
                 3 => Operation::Input,
                 4 => Operation::Output,
                 5 => Operation::JumpIfTrue,
+                6 => Operation::JumpIfFalse,
                 99 => Operation::Halt,
                 _ => panic!("Unknown operation code"),
             },
@@ -126,9 +128,11 @@ impl Intcode {
             }
             Operation::JumpIfTrue => match p1.expect("Need jump flag") {
                 0 => self.move_pointer(3),
-                _ => {
-                    self.pointer = p2.expect("Need jump destination").clone() as usize;
-                }
+                _ => self.pointer = p2.expect("Need jump destination").clone() as usize,
+            },
+            Operation::JumpIfFalse => match p1.expect("Need jump flag") {
+                0 => self.pointer = p2.expect("Need jump destination").clone() as usize,
+                _ => self.move_pointer(3),
             },
             _ => {}
         }
@@ -208,6 +212,14 @@ mod tests {
         let mut computer = Intcode::new(vec![5, 8, 3, 7, 2, 3, 2, 99, 0]);
         assert_eq!(computer.pointer, 0);
         assert_eq!(computer.next(), Some(vec![5, 8, 3, 7, 2, 3, 2, 99, 0]));
+        assert_eq!(computer.pointer, 3);
+    }
+
+    #[test]
+    fn test_intcode6_non_zero() {
+        let mut computer = Intcode::new(vec![6, 8, 3, 7, 2, 3, 2, 99, 1]);
+        assert_eq!(computer.pointer, 0);
+        assert_eq!(computer.next(), Some(vec![6, 8, 3, 7, 2, 3, 2, 99, 1]));
         assert_eq!(computer.pointer, 3);
     }
 
