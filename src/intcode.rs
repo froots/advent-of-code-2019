@@ -1,7 +1,54 @@
+#[derive(PartialEq, Debug)]
+enum Operation {
+    Add,
+    Multiply,
+    Input,
+    Output,
+    Halt,
+}
+
+#[derive(PartialEq, Debug)]
+enum ParameterMode {
+    Position,
+    Immediate,
+}
+
+pub struct Instruction {
+    operation: Operation,
+    p1_mode: ParameterMode,
+    p2_mode: ParameterMode,
+    p3_mode: ParameterMode,
+}
+
+impl Instruction {
+    fn new(opcode: i32, p1_mode: i32, p2_mode: i32, p3_mode: i32) -> Instruction {
+        Instruction {
+            operation: match opcode {
+                1 => Operation::Add,
+                2 => Operation::Multiply,
+                3 => Operation::Input,
+                4 => Operation::Output,
+                99 => Operation::Halt,
+                _ => panic!("Unknown operation code"),
+            },
+            p1_mode: Instruction::match_mode(p1_mode),
+            p2_mode: Instruction::match_mode(p2_mode),
+            p3_mode: Instruction::match_mode(p3_mode),
+        }
+    }
+
+    fn match_mode(mode: i32) -> ParameterMode {
+        match mode {
+            0 => ParameterMode::Position,
+            _ => ParameterMode::Immediate,
+        }
+    }
+}
+
 pub struct Intcode {
     state: Vec<i32>,
     input: Option<i32>,
-    pub output: Option<i32>,
+    pub output: Vec<i32>,
     pointer: usize,
 }
 
@@ -10,7 +57,7 @@ impl Intcode {
         Intcode {
             state,
             input: None,
-            output: None,
+            output: vec![],
             pointer: 0,
         }
     }
@@ -19,7 +66,7 @@ impl Intcode {
         Intcode {
             state,
             input: Some(input),
-            output: None,
+            output: vec![],
             pointer: 0,
         }
     }
@@ -28,54 +75,66 @@ impl Intcode {
         self.last()
     }
 
-    pub fn execute_with_output(&mut self) -> (Option<Vec<i32>>, Option<i32>) {
-        (self.execute(), self.output)
+    pub fn execute_with_output(&mut self) -> (Option<Vec<i32>>, &Vec<i32>) {
+        (self.execute(), &self.output)
     }
 
-    fn pointer_value(&self) -> &i32 {
-        self.state.get(self.pointer).unwrap()
+    fn pointer_value(&self, offset: usize) -> Option<&i32> {
+        self.state.get(self.pointer + offset)
     }
 
-    fn get_param(&self, n: usize) -> usize {
-        self.state[self.pointer + n] as usize
-    }
+    fn get_param(&self, parameter_mode: &ParameterMode, offset: usize) -> Option<&i32> {
+        let value: Option<&i32> = self.pointer_value(offset);
 
-    fn add(&mut self) -> Vec<i32> {
-        let i1 = self.get_param(1);
-        let i2 = self.get_param(2);
-        let ri = self.get_param(3);
-        self.state[ri] = self.state[i1] + self.state[i2];
-        self.pointer += 4;
-        self.state.clone()
-    }
-
-    fn mult(&mut self) -> Vec<i32> {
-        let i1 = self.get_param(1);
-        let i2 = self.get_param(2);
-        let ri = self.get_param(3);
-        self.state[ri] = self.state[i1] * self.state[i2];
-        self.pointer += 4;
-        self.state.clone()
-    }
-
-    fn input(&mut self) -> Vec<i32> {
-        if self.input == None {
-            panic!("Input opcode requires a defined input prop");
+        match (value, parameter_mode) {
+            (Some(v), ParameterMode::Position) => self.state.get(*v as usize),
+            (Some(v), ParameterMode::Immediate) => Some(v),
+            (None, _) => None,
         }
-        let i = self.get_param(1);
-        self.state[i] = self.input.unwrap();
-        self.pointer += 2;
-        self.state.clone()
     }
 
-    fn output(&mut self) -> Vec<i32> {
-        if self.output != None {
-            panic!("Program already created output");
+    fn set_state(&mut self, i: usize, val: i32) {
+        self.state[i] = val;
+    }
+
+    fn move_pointer(&mut self, n: usize) {
+        self.pointer += n;
+    }
+
+    fn execute_instruction(&mut self, instruction: Instruction) -> Option<Vec<i32>> {
+        let p1 = self.get_param(&instruction.p1_mode, 1);
+        let p2 = self.get_param(&instruction.p2_mode, 2);
+
+        match instruction.operation {
+            Operation::Add => {
+                let set_i = self.pointer_value(3).expect("Add store index");
+                self.set_state(*set_i as usize, p1.unwrap() + p2.unwrap());
+                self.move_pointer(4);
+            }
+            Operation::Multiply => {
+                let set_i = self.pointer_value(3).expect("Multiply store index");
+                self.set_state(*set_i as usize, p1.unwrap() * p2.unwrap());
+                self.move_pointer(4);
+            }
+            Operation::Input => {
+                let set_i = self.pointer_value(1).expect("Input store index");
+                self.set_state(
+                    *set_i as usize,
+                    self.input.expect("Input operation requires input value"),
+                );
+                self.move_pointer(2);
+            }
+            Operation::Output => {
+                self.output.push(p1.unwrap().clone());
+                self.move_pointer(2);
+            }
+            _ => {}
         }
-        let i = self.get_param(1);
-        self.output = self.state.get(i).cloned();
-        self.pointer += 2;
-        self.state.clone()
+
+        match instruction.operation {
+            Operation::Halt => None,
+            _ => Some(self.state.clone()),
+        }
     }
 }
 
@@ -83,15 +142,21 @@ impl Iterator for Intcode {
     type Item = Vec<i32>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.pointer_value() {
-            1 => Some(self.add()),
-            2 => Some(self.mult()),
-            3 => Some(self.input()),
-            4 => Some(self.output()),
-            99 => None,
-            _ => None,
-        }
+        let instruction =
+            parse_instruction(self.pointer_value(0).expect("No instruction to parse"));
+        self.execute_instruction(instruction)
     }
+}
+
+fn parse_instruction(code: &i32) -> Instruction {
+    let p3_mode = code / 10_000;
+    let mut remain = code % 10_000;
+    let p2_mode = remain / 1_000;
+    remain = remain % 1_000;
+    let p1_mode = remain / 100;
+    remain = remain % 100;
+
+    Instruction::new(remain, p1_mode, p2_mode, p3_mode)
 }
 
 #[cfg(test)]
@@ -121,10 +186,10 @@ mod tests {
     #[test]
     fn test_intcode4() {
         let mut computer = Intcode::new(vec![4, 2, 99]);
-        assert_eq!(computer.output, None);
+        assert_eq!(computer.output, vec![]);
         assert_eq!(computer.next(), Some(vec![4, 2, 99]));
         assert_eq!(computer.next(), None);
-        assert_eq!(computer.output, Some(99));
+        assert_eq!(computer.output, vec![99]);
     }
 
     #[test]
@@ -137,6 +202,39 @@ mod tests {
     fn test_execute_with_output() {
         let mut computer = Intcode::new_with_input(vec![3, 0, 4, 0, 99], 12);
         let (_, output) = computer.execute_with_output();
-        assert_eq!(output, Some(12));
+        assert_eq!(output, &vec![12]);
+    }
+
+    #[test]
+    fn test_parse_instruction1() {
+        let instruction = parse_instruction(&1002);
+        assert_eq!(instruction.operation, Operation::Multiply);
+        assert_eq!(instruction.p1_mode, ParameterMode::Position);
+        assert_eq!(instruction.p2_mode, ParameterMode::Immediate);
+        assert_eq!(instruction.p3_mode, ParameterMode::Position);
+    }
+
+    #[test]
+    fn test_parse_instruction2() {
+        let instruction = parse_instruction(&10101);
+        assert_eq!(instruction.operation, Operation::Add);
+        assert_eq!(instruction.p1_mode, ParameterMode::Immediate);
+        assert_eq!(instruction.p2_mode, ParameterMode::Position);
+        assert_eq!(instruction.p3_mode, ParameterMode::Immediate);
+    }
+
+    #[test]
+    fn test_parse_instruction3() {
+        let instruction = parse_instruction(&4);
+        assert_eq!(instruction.operation, Operation::Output);
+        assert_eq!(instruction.p1_mode, ParameterMode::Position);
+        assert_eq!(instruction.p2_mode, ParameterMode::Position);
+        assert_eq!(instruction.p3_mode, ParameterMode::Position);
+    }
+
+    #[test]
+    fn test_parameter_modes1() {
+        let mut computer = Intcode::new(vec![102, 5, 3, 2, 99]);
+        assert_eq!(computer.next(), Some(vec![102, 5, 10, 2, 99]));
     }
 }
