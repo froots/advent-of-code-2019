@@ -10,6 +10,7 @@ enum Operation {
     JumpIfTrue,
     JumpIfFalse,
     LessThan,
+    Equal,
 }
 
 #[derive(PartialEq, Debug)]
@@ -36,6 +37,7 @@ impl Instruction {
                 5 => Operation::JumpIfTrue,
                 6 => Operation::JumpIfFalse,
                 7 => Operation::LessThan,
+                8 => Operation::Equal,
                 99 => Operation::Halt,
                 _ => panic!("Unknown operation code"),
             },
@@ -139,12 +141,29 @@ impl Intcode {
                 _ => self.move_pointer(3),
             },
             Operation::LessThan => {
-                let set_i = self.pointer_value(3).expect("Multiply store index").clone() as usize;
+                let set_i = self
+                    .pointer_value(3)
+                    .expect("Less than store index")
+                    .clone() as usize;
                 self.state[set_i] = match p1
                     .expect("Need less than param")
                     .cmp(p2.expect("Need more than param"))
                 {
                     Ordering::Less => 1,
+                    _ => 0,
+                };
+                self.move_pointer(4);
+            }
+            Operation::Equal => {
+                let set_i = self
+                    .pointer_value(3)
+                    .expect("Need equal store index")
+                    .clone() as usize;
+                self.state[set_i] = match p1
+                    .expect("Need equal param 1")
+                    .cmp(p2.expect("Need equal param 2"))
+                {
+                    Ordering::Equal => 1,
                     _ => 0,
                 };
                 self.move_pointer(4);
@@ -239,9 +258,27 @@ mod tests {
     }
 
     #[test]
-    fn test_intcode7() {
+    fn test_intcode7_less_than() {
         let mut computer = Intcode::new(vec![7, 7, 8, 7, 4, 7, 99, 3, 8]);
         assert_eq!(computer.next(), Some(vec![7, 7, 8, 7, 4, 7, 99, 1, 8]));
+    }
+
+    #[test]
+    fn test_intcode7_greater_than() {
+        let mut computer = Intcode::new(vec![7, 7, 8, 7, 4, 7, 99, 9, 8]);
+        assert_eq!(computer.next(), Some(vec![7, 7, 8, 7, 4, 7, 99, 0, 8]));
+    }
+
+    #[test]
+    fn test_intcode8_equal() {
+        let mut computer = Intcode::new(vec![8, 5, 6, 0, 99, 4, 4]);
+        assert_eq!(computer.next(), Some(vec![1, 5, 6, 0, 99, 4, 4]));
+    }
+
+    #[test]
+    fn test_intcode8_not_equal() {
+        let mut computer = Intcode::new(vec![8, 5, 6, 0, 99, 5, 4]);
+        assert_eq!(computer.next(), Some(vec![0, 5, 6, 0, 99, 5, 4]));
     }
 
     #[test]
