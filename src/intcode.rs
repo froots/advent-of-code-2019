@@ -204,6 +204,14 @@ mod tests {
     }
 
     #[test]
+    fn test_intcode5_zero() {
+        let mut computer = Intcode::new(vec![5, 8, 3, 7, 2, 3, 2, 99, 0]);
+        assert_eq!(computer.pointer, 0);
+        assert_eq!(computer.next(), Some(vec![5, 8, 3, 7, 2, 3, 2, 99, 0]));
+        assert_eq!(computer.pointer, 3);
+    }
+
+    #[test]
     fn test_execute() {
         let mut computer = Intcode::new(vec![2, 3, 0, 3, 99]);
         assert_eq!(computer.execute(), Some(vec![2, 3, 0, 6, 99]));
