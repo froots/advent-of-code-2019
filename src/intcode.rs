@@ -49,7 +49,7 @@ pub struct Intcode {
     state: Vec<i32>,
     input: Option<i32>,
     pub output: Vec<i32>,
-    pointer: usize,
+    pub pointer: usize,
 }
 
 impl Intcode {
@@ -93,10 +93,6 @@ impl Intcode {
         }
     }
 
-    fn set_state(&mut self, i: usize, val: i32) {
-        self.state[i] = val;
-    }
-
     fn move_pointer(&mut self, n: usize) {
         self.pointer += n;
     }
@@ -107,25 +103,23 @@ impl Intcode {
 
         match instruction.operation {
             Operation::Add => {
-                let set_i = self.pointer_value(3).expect("Add store index");
-                self.set_state(*set_i as usize, p1.unwrap() + p2.unwrap());
+                let set_i = self.pointer_value(3).expect("Add store index").clone() as usize;
+                self.state[set_i] = p1.unwrap() + p2.unwrap();
                 self.move_pointer(4);
             }
             Operation::Multiply => {
-                let set_i = self.pointer_value(3).expect("Multiply store index");
-                self.set_state(*set_i as usize, p1.unwrap() * p2.unwrap());
+                let set_i = self.pointer_value(3).expect("Multiply store index").clone() as usize;
+                self.state[set_i] = p1.unwrap() * p2.unwrap();
                 self.move_pointer(4);
             }
             Operation::Input => {
-                let set_i = self.pointer_value(1).expect("Input store index");
-                self.set_state(
-                    *set_i as usize,
-                    self.input.expect("Input operation requires input value"),
-                );
+                let set_i = self.pointer_value(1).expect("Input store index").clone() as usize;
+                self.state[set_i] = self.input.expect("Input operation requires input value");
                 self.move_pointer(2);
             }
             Operation::Output => {
-                self.output.push(p1.unwrap().clone());
+                let output_i = p1.expect("Need output index").clone();
+                self.output.push(output_i);
                 self.move_pointer(2);
             }
             _ => {}
@@ -190,6 +184,15 @@ mod tests {
         assert_eq!(computer.next(), Some(vec![4, 2, 99]));
         assert_eq!(computer.next(), None);
         assert_eq!(computer.output, vec![99]);
+    }
+
+    #[test]
+    fn test_intcode5_non_zero() {
+        let mut computer = Intcode::new(vec![5, 1, 3, 7, 2, 3, 2, 99]);
+        assert_eq!(computer.pointer, 0);
+        assert_eq!(computer.next(), Some(vec![5, 1, 3, 7, 2, 3, 2, 99]));
+        assert_eq!(computer.pointer, 7);
+        assert_eq!(computer.next(), None);
     }
 
     #[test]
