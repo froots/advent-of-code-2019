@@ -5,6 +5,7 @@ enum Operation {
     Input,
     Output,
     Halt,
+    JumpIfTrue,
 }
 
 #[derive(PartialEq, Debug)]
@@ -28,6 +29,7 @@ impl Instruction {
                 2 => Operation::Multiply,
                 3 => Operation::Input,
                 4 => Operation::Output,
+                5 => Operation::JumpIfTrue,
                 99 => Operation::Halt,
                 _ => panic!("Unknown operation code"),
             },
@@ -122,6 +124,12 @@ impl Intcode {
                 self.output.push(output_i);
                 self.move_pointer(2);
             }
+            Operation::JumpIfTrue => match p1.expect("Need jump flag") {
+                0 => self.move_pointer(3),
+                _ => {
+                    self.pointer = p2.expect("Need jump destination").clone() as usize;
+                }
+            },
             _ => {}
         }
 
