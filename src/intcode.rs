@@ -326,4 +326,25 @@ mod tests {
         let mut computer = Intcode::new(vec![102, 5, 3, 2, 99]);
         assert_eq!(computer.next(), Some(vec![102, 5, 10, 2, 99]));
     }
+
+    // Provided input-output tests from day 5
+    #[test]
+    fn test_input_output_examples() {
+        let examples = vec![
+            (vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], 8, vec![1]),
+            (vec![3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], 7, vec![0]),
+            (vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], 7, vec![1]),
+            (vec![3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], 8, vec![0]),
+            (vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], 8, vec![1]),
+            (vec![3, 3, 1108, -1, 8, 3, 4, 3, 99], 7, vec![0]),
+            (vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], 7, vec![1]),
+            (vec![3, 3, 1107, -1, 8, 3, 4, 3, 99], 8, vec![0]),
+        ];
+
+        for (program, input, expected_output) in examples {
+            let mut computer = Intcode::new_with_input(program, input);
+            let (_, output) = computer.execute_with_output();
+            assert_eq!(output, &expected_output);
+        }
+    }
 }
