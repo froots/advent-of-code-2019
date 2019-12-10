@@ -1,6 +1,6 @@
 use crate::intcode;
 
-pub fn part1(program_text: &str, input: i32) -> Vec<i32> {
+pub fn run(program_text: &str, input: i32) -> Vec<i32> {
     let program = parse(program_text);
     let mut computer = intcode::Intcode::new_with_input(program, input);
     let (_state, output) = computer.execute_with_output();
