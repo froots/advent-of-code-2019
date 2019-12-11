@@ -6,3 +6,4 @@ pub mod d5;
 pub mod d6;
 pub mod input;
 pub mod intcode;
+pub mod tree;

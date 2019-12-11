@@ -1,6 +1,9 @@
+use crate::tree::Tree;
+
 pub fn part1(orbit_data: &str) -> u32 {
-    // parse orbit data to planets
     let parsed = parse(orbit_data);
+    // Create graph structure from orbit orbit_data
+    // let tree = Tree::from_data(&parsed);
     // iterate over each planet and count orbit links to root
     1
 }
@@ -45,4 +48,11 @@ mod tests {
             ]
         );
     }
+
+    // #[test]
+    // fn test_tree_from_data() {
+    //     let data = vec![("COM", "B"), ("B", "C"), ("B", "D"), ("C", "E")];
+    //     let tree = Tree::from_data(&data);
+    //     assert_eq!(tree.nodes.len(), 5);
+    // }
 }
